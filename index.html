@@ -281,20 +281,16 @@ async function loadSchedule() {
     const response = await fetch("schedule.json");
     const data = await response.json();
 
-    const items = data.data.items;
-    const columns = data.data.columns;
-
-    const gameIndex = columns.findIndex(c => c.toLowerCase().includes("game"));
-    const runnerIndex = columns.findIndex(c => c.toLowerCase().includes("runner"));
-
+    const items = data.schedule.items;
     const now = Date.now();
+
     let currentIndex = -1;
 
     for (let i = 0; i < items.length; i++) {
       const start = items[i].scheduled_t * 1000;
-      const nextStart = items[i + 1]?.scheduled_t * 1000 || Infinity;
+      const end = start + (items[i].length_t * 1000);
 
-      if (now >= start && now < nextStart) {
+      if (now >= start && now < end) {
         currentIndex = i;
         break;
       }
@@ -304,16 +300,19 @@ async function loadSchedule() {
     const next = items[currentIndex + 1];
 
     document.getElementById("now-game").textContent =
-      current ? current.data[gameIndex] : "Event not live";
+      current ? current.data[0] : "Event not live";
 
     document.getElementById("now-runner").textContent =
-      current ? current.data[runnerIndex] : "—";
+      current ? "" : "—";
 
     document.getElementById("next-game").textContent =
-      next ? next.data[gameIndex] : "—";
+      next ? next.data[0] : "—";
 
   } catch (err) {
     console.error("Schedule load error:", err);
+    document.getElementById("now-game").textContent = "Schedule unavailable";
+    document.getElementById("now-runner").textContent = "—";
+    document.getElementById("next-game").textContent = "—";
   }
 }
 
