@@ -223,12 +223,12 @@
       </a>
     </div>
 
-    <div class="small-box">
-      <h2>Now Playing</h2>
-      <p><strong>Game:</strong> TBD</p>
-      <p><strong>Runner:</strong> TBD</p>
-      <p><strong>Up Next:</strong> TBD</p>
-    </div>
+  <div class="small-box">
+  <h2>Now Playing</h2>
+  <p><strong>Game:</strong> <span id="now-game">Loading...</span></p>
+  <p><strong>Runner:</strong> <span id="now-runner">Loading...</span></p>
+  <p><strong>Up Next:</strong> <span id="next-game">Loading...</span></p>
+   </div>
   </section>
 
   <section class="box">
@@ -275,6 +275,50 @@
   <footer>
     Twitch • Discord • Donation Link • Credits
   </footer>
+<script>
+async function loadSchedule() {
+  try {
+    const response = await fetch("schedule.json");
+    const data = await response.json();
 
+    const items = data.data.items;
+    const columns = data.data.columns;
+
+    const gameIndex = columns.findIndex(c => c.toLowerCase().includes("game"));
+    const runnerIndex = columns.findIndex(c => c.toLowerCase().includes("runner"));
+
+    const now = Date.now();
+    let currentIndex = -1;
+
+    for (let i = 0; i < items.length; i++) {
+      const start = items[i].scheduled_t * 1000;
+      const nextStart = items[i + 1]?.scheduled_t * 1000 || Infinity;
+
+      if (now >= start && now < nextStart) {
+        currentIndex = i;
+        break;
+      }
+    }
+
+    const current = items[currentIndex];
+    const next = items[currentIndex + 1];
+
+    document.getElementById("now-game").textContent =
+      current ? current.data[gameIndex] : "Event not live";
+
+    document.getElementById("now-runner").textContent =
+      current ? current.data[runnerIndex] : "—";
+
+    document.getElementById("next-game").textContent =
+      next ? next.data[gameIndex] : "—";
+
+  } catch (err) {
+    console.error("Schedule load error:", err);
+  }
+}
+
+loadSchedule();
+setInterval(loadSchedule, 60000);
+</script>
 </body>
 </html>
