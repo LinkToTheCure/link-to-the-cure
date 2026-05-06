@@ -234,33 +234,21 @@
   <section class="box">
     <h2>Schedule</h2>
 
-    <table>
+   <div class="box">
+  <h2>Schedule</h2>
+
+  <table id="schedule-table">
+    <thead>
       <tr>
         <th>Time</th>
-        <th>Game</th>
-        <th>Runner</th>
+        <th>Run</th>
       </tr>
-      <tr>
-        <td>Friday 7:00 PM</td>
-        <td>Opening Ceremony</td>
-        <td>LttC Team</td>
-      </tr>
-      <tr>
-        <td>Saturday 10:00 AM</td>
-        <td>[ Game Title ]</td>
-        <td>[ Runner Name ]</td>
-      </tr>
-      <tr>
-        <td>Saturday 12:00 PM</td>
-        <td>[ Game Title ]</td>
-        <td>[ Runner Name ]</td>
-      </tr>
-      <tr>
-        <td>Sunday TBD</td>
-        <td>Finale</td>
-        <td>LttC Team</td>
-      </tr>
-    </table>
+    </thead>
+    <tbody>
+      <!-- filled by JS -->
+    </tbody>
+  </table>
+</div>
   </section>
 
   <section class="box">
@@ -282,6 +270,7 @@ async function loadSchedule() {
     const data = await response.json();
 
     const items = data.schedule.items;
+    renderSchedule(items);
     const now = Date.now();
 
     let currentIndex = -1;
@@ -318,6 +307,34 @@ async function loadSchedule() {
 
 loadSchedule();
 setInterval(loadSchedule, 60000);
+  function formatTime(timestamp) {
+  const date = new Date(timestamp * 1000);
+  return date.toLocaleString("en-US", {
+    weekday: "short",
+    hour: "numeric",
+    minute: "2-digit"
+  });
+}
+
+function renderSchedule(items) {
+  const tableBody = document.querySelector("#schedule-table tbody");
+  tableBody.innerHTML = "";
+
+  items.forEach(item => {
+    const row = document.createElement("tr");
+
+    const timeCell = document.createElement("td");
+    timeCell.textContent = formatTime(item.scheduled_t);
+
+    const runCell = document.createElement("td");
+    runCell.textContent = item.data[0];
+
+    row.appendChild(timeCell);
+    row.appendChild(runCell);
+
+    tableBody.appendChild(row);
+  });
+}
 </script>
 </body>
 </html>
