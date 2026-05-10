@@ -17,6 +17,16 @@
       text-align: center;
     }
 
+    .countdown-box {
+  text-align: center;
+  }
+
+   #countdown {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-top: 10px;
+  }
+    
     .box {
   border: 2px solid #c68c53;
   border-radius: 14px;
@@ -268,8 +278,12 @@
   </section>
 <section id="schedule">
   <section class="box">
-  <!--<h2>Schedule</h2>-->
 
+  <section class="box countdown-box">
+  <h2>Countdown to Link to the Cure</h2>
+  <div id="countdown">Loading...</div>
+  </section>
+    
    <div class="box">
      
   <h2>Schedule</h2>
@@ -370,5 +384,28 @@ function renderSchedule(items) {
   });
 }
 </script>
+ <script>
+  const eventDate = new Date("2026-06-05T18:00:00-06:00").getTime();
+
+  function updateCountdown() {
+    const now = new Date().getTime();
+    const distance = eventDate - now;
+
+    if (distance <= 0) {
+      document.getElementById("countdown").innerHTML = "We are live!";
+      return;
+    }
+
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((distance / (1000 * 60)) % 60);
+
+    document.getElementById("countdown").innerHTML =
+      `${days} days, ${hours} hours, ${minutes} minutes`;
+  }
+
+  updateCountdown();
+  setInterval(updateCountdown, 60000);
+</script> 
 </body>
 </html>
