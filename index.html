@@ -417,6 +417,53 @@
 .discord-link:hover .discord-icon {
     opacity: 1;
 }
+    .donate-link {
+    position: relative;
+    display: inline-block;
+
+    width: 90px;
+
+    text-align: center;
+
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.donate-link .link-text {
+    display: block;
+    transition: opacity 0.25s ease;
+}
+
+.donate-link .donate-icon {
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+
+    transform: translate(-50%, -50%);
+
+    opacity: 0;
+
+    transition: opacity 0.25s ease;
+
+    pointer-events: none;
+}
+
+.donate-link .donate-icon img {
+    width: 34px;
+    height: auto;
+
+    filter: drop-shadow(0 0 6px rgba(0,255,120,0.35));
+}
+
+.donate-link:hover .link-text {
+    opacity: 0;
+}
+
+.donate-link:hover .donate-icon {
+    opacity: 1;
+}
   </style>
 </head>
 
@@ -450,20 +497,19 @@
     </span>
 
 </a>
-  <a href="https://YOURDONATIONLINK.com" target="_blank">Donate</a>
-  <a href="https://www.youtube.com/@linktothecure4130"
-   class="youtube-link"
+  <a href="https://streamlabscharity.com/@linktothecure/link-to-the-cure-2026"
+   class="donate-link"
    target="_blank">
-<span class="link-text">
-    Highlights
-</span>
-   <span class="youtube-icon">
-    <span class="youtube-pill">
-        ▶
-    </span>
-   </span>
 
-  </a>
+    <span class="link-text">
+        Donate
+    </span>
+
+    <span class="donate-icon">
+        <img src="childsplay-icon.png" alt="Donate">
+    </span>
+
+</a>
   </nav>
   <section class="box">
   <img src="LttC.png" alt="Link to the Cure Logo" class="logo">
