@@ -230,44 +230,6 @@
         padding: 8px;
       }
     }
-    .youtube-link {
-    position: relative;
-    display: inline-block;
-
-    width: 110px;
-    text-align: center;
-
-    color: white;
-    text-decoration: none;
-    font-weight: bold;
-
-    transition: all 0.3s ease;
-}
-
-/* NORMAL TEXT */
-
-.youtube-link .link-text {
-    display: inline-block;
-    transition: opacity 0.3s ease;
-}
-
-/* HIDDEN ICON */
-
-.youtube-link .youtube-icon {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-
-    transform: translate(-50%, -50%);
-
-    opacity: 0;
-
-    color: #ff0000;
-    font-size: 1.4rem;
-
-    transition: opacity 0.3s ease;
-}
-
 .youtube-link {
     position: relative;
     display: inline-block;
@@ -281,14 +243,14 @@
     font-weight: bold;
 }
 
-/* TEXT */
+/* NORMAL TEXT */
 
 .youtube-link .link-text {
     display: block;
     transition: opacity 0.25s ease;
 }
 
-/* ICON */
+/* ICON CONTAINER */
 
 .youtube-link .youtube-icon {
     position: absolute;
@@ -300,15 +262,33 @@
 
     opacity: 0;
 
-    color: #ff0000;
-    font-size: 1.2rem;
-
     transition: opacity 0.25s ease;
 
     pointer-events: none;
 }
 
-/* HOVER */
+/* YOUTUBE BUTTON */
+
+.youtube-pill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 34px;
+    height: 24px;
+
+    background: #ff0000;
+
+    border-radius: 8px;
+
+    color: white;
+    font-size: 0.9rem;
+    line-height: 1;
+
+    box-shadow: 0 0 8px rgba(255,0,0,0.45);
+}
+
+/* HOVER EFFECT */
 
 .youtube-link:hover .link-text {
     opacity: 0;
@@ -330,9 +310,11 @@
    class="youtube-link"
    target="_blank">
 
-    <span class="link-text">Highlights</span>
-
-    <span class="youtube-icon">▶</span>
+   <span class="youtube-icon">
+    <span class="youtube-pill">
+        ▶
+    </span>
+   </span>
 
   </a>
   </nav>
