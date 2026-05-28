@@ -297,13 +297,83 @@
 .youtube-link:hover .youtube-icon {
     opacity: 1;
 }
+    .twitch-link {
+    position: relative;
+    display: inline-block;
+    width: 90px;
+
+    text-align: center;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.twitch-link .link-text {
+    display: block;
+    transition: opacity 0.25s ease;
+}
+
+.twitch-link .twitch-icon {
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+
+    transform: translate(-50%, -50%);
+
+    opacity: 0;
+
+    transition: opacity 0.25s ease;
+
+    pointer-events: none;
+}
+
+.twitch-pill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 34px;
+    height: 24px;
+
+    background: #9146ff;
+
+    border-radius: 8px;
+
+    color: white;
+    font-size: 1rem;
+
+    box-shadow: 0 0 8px rgba(145,70,255,0.45);
+}
+
+.twitch-link:hover .link-text {
+    opacity: 0;
+}
+
+.twitch-link:hover .twitch-icon {
+    opacity: 1;
+}
   </style>
 </head>
 
 <body>
   <nav class="navbar">
   <a href="#schedule">Schedule</a>
-  <a href="https://twitch.tv/linktothecure" target="_blank">Twitch</a>
+ <a href="https://twitch.tv/linktothecure"
+   class="twitch-link"
+   target="_blank">
+
+    <span class="link-text">
+        Twitch
+    </span>
+
+    <span class="twitch-icon">
+        <span class="twitch-pill">
+            ☾
+        </span>
+    </span>
+
+</a>
   <a href="https://discord.gg/https://discord.gg/Wd9zp66AXA" target="_blank">Discord</a>  
   <a href="https://YOURDONATIONLINK.com" target="_blank">Donate</a>
   <a href="https://www.youtube.com/@linktothecure4130"
