@@ -230,6 +230,53 @@
         padding: 8px;
       }
     }
+    .youtube-link {
+    position: relative;
+    display: inline-block;
+
+    width: 110px;
+    text-align: center;
+
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+
+    transition: all 0.3s ease;
+}
+
+/* NORMAL TEXT */
+
+.youtube-link .link-text {
+    display: inline-block;
+    transition: opacity 0.3s ease;
+}
+
+/* HIDDEN ICON */
+
+.youtube-link .youtube-icon {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+
+    transform: translate(-50%, -50%);
+
+    opacity: 0;
+
+    color: #ff0000;
+    font-size: 1.4rem;
+
+    transition: opacity 0.3s ease;
+}
+
+/* HOVER EFFECT */
+
+.youtube-link:hover .link-text {
+    opacity: 0;
+}
+
+.youtube-link:hover .youtube-icon {
+    opacity: 1;
+}
     .charity-info {
   margin-top: 25px;
   padding-top: 20px;
