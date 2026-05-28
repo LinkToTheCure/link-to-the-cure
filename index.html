@@ -353,6 +353,73 @@
 .twitch-link:hover .twitch-icon {
     opacity: 1;
 }
+    .discord-link {
+    position: relative;
+    display: inline-block;
+
+    width: 100px;
+
+    text-align: center;
+
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* NORMAL TEXT */
+
+.discord-link .link-text {
+    display: block;
+    transition: opacity 0.25s ease;
+}
+
+/* ICON CONTAINER */
+
+.discord-link .discord-icon {
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+
+    transform: translate(-50%, -50%);
+
+    opacity: 0;
+
+    transition: opacity 0.25s ease;
+
+    pointer-events: none;
+}
+
+/* DISCORD BUTTON */
+
+.discord-pill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 34px;
+    height: 24px;
+
+    background: #5865F2;
+
+    border-radius: 8px;
+
+    color: white;
+    font-size: 0.9rem;
+    line-height: 1;
+
+    box-shadow: 0 0 8px rgba(88,101,242,0.45);
+}
+
+/* HOVER EFFECT */
+
+.discord-link:hover .link-text {
+    opacity: 0;
+}
+
+.discord-link:hover .discord-icon {
+    opacity: 1;
+}
   </style>
 </head>
 
@@ -374,7 +441,21 @@
     </span>
 
 </a>
-  <a href="https://discord.gg/https://discord.gg/Wd9zp66AXA" target="_blank">Discord</a>  
+    <a href="https://discord.gg/https://discord.gg/Wd9zp66AXA"
+   class="discord-link"
+   target="_blank">
+
+    <span class="link-text">
+        Discord
+    </span>
+
+    <span class="discord-icon">
+        <span class="discord-pill">
+            🎮
+        </span>
+    </span>
+
+</a>
   <a href="https://YOURDONATIONLINK.com" target="_blank">Donate</a>
   <a href="https://www.youtube.com/@linktothecure4130"
    class="youtube-link"
