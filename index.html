@@ -203,45 +203,7 @@
     Twitch • Discord • Donation Link • Credits
   </footer>
 <script>
-async function loadSchedule() {
-  try {
-    const response = await fetch("schedule.json");
-    const data = await response.json();
 
-    const items = data.schedule.items;
-    renderSchedule(items);
-    const now = Date.now();
-
-    let currentIndex = -1;
-
-    for (let i = 0; i < items.length; i++) {
-      const start = items[i].scheduled_t * 1000;
-      const end = start + (items[i].length_t * 1000);
-
-      if (now >= start && now < end) {
-        currentIndex = i;
-        break;
-      }
-    }
-
-    const current = items[currentIndex];
-    const next = items[currentIndex + 1];
-
-    document.getElementById("now-game").textContent =
-      current ? current.data[0] : "Event not live";
-
-    document.getElementById("next-game").textContent =
-      next ? next.data[0] : "—";
-
-  } catch (err) {
-  console.error("Schedule load error:", err);
-  document.getElementById("now-game").textContent = "Schedule unavailable";
-  document.getElementById("next-game").textContent = "—";
-}
-}
-
-loadSchedule();
-setInterval(loadSchedule, 60000);
   function formatTime(timestamp) {
   const date = new Date(timestamp * 1000);
   return date.toLocaleString("en-US", {
