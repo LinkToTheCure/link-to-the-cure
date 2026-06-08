@@ -268,8 +268,10 @@ function renderSchedule(items) {
     const distance = eventDate - now;
 
     if (distance <= 0) {
-      document.getElementById("countdown").innerHTML = "We are live!";
-      return;
+    document.getElementById("countdown").innerHTML =
+    "Link to the Cure 2026 has concluded. Thank you for helping us raise $1,104 for Child's Play!";
+    return;
+    }
     }
 
     const days = Math.floor(distance / (1000 * 60 * 60 * 24));
