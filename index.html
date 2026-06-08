@@ -223,11 +223,10 @@ async function loadSchedule() {
       next ? next.data[0] : "—";
 
   } catch (err) {
-    console.error("Schedule load error:", err);
-    document.getElementById("now-game").textContent = "Schedule unavailable";
-    document.getElementById("now-runner").textContent = "—";
-    document.getElementById("next-game").textContent = "—";
-  }
+  console.error("Schedule load error:", err);
+  document.getElementById("now-game").textContent = "Schedule unavailable";
+  document.getElementById("next-game").textContent = "—";
+}
 }
 
 loadSchedule();
