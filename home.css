@@ -185,12 +185,11 @@ body {
 }
 
 .stat strong {
-  display: block;
-  color: var(--burgundy);
+  display: inline-block;
+  color: var(--bronze-light);
   font-size: 2rem;
-  text-shadow:
-    0 1px 0 rgba(255,255,255,0.15),
-    0 0 8px rgba(122,38,58,0.5);
+  border-bottom: 2px solid var(--burgundy);
+  padding-bottom: 4px;
 }
 
 .stat span {
