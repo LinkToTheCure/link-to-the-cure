@@ -190,6 +190,7 @@ body {
   font-size: 2rem;
   border-bottom: 2px solid var(--burgundy);
   padding-bottom: 4px;
+  text-shadow: none;
 }
 
 .stat span {
