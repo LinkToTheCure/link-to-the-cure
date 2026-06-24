@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DKDGR9PYD3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-DKDGR9PYD3');
+</script>
+
+  <link rel="stylesheet" href="event.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Link to the Cure</title>
+<link rel="icon" type="image/png" href="8-bitheart.png">
+ 
+</head>
+
+<body>
+  <nav class="navbar">
+  <a href="#schedule">Schedule</a>
+<a href="https://twitch.tv/linktothecure"
+   class="twitch-link"
+   target="_blank">
+
+    <span class="link-text">
+        Twitch
+    </span>
+
+    <span class="twitch-icon">
+        <img src="twitch-icon.png" alt="Twitch">
+    </span>
+
+</a>
+</a>
+    <a href="https://discord.gg/Wd9zp66AXA"
+   class="discord-link"
+   target="_blank">
+
+    <span class="link-text">
+        Discord
+    </span>
+
+    <span class="discord-icon">
+        <img src="discord-icon.png" alt="Discord">
+    </span>
+
+</a>
+  <a href="results.html"
+   class="donate-link"
+   target="_blank">
+
+    <span class="link-text">
+        Donate
+    </span>
+
+    <span class="donate-icon">
+        <img src="childsplay-icon.png" alt="Donate">
+    </span>
+
+</a>
+    <a href="https://www.youtube.com/@linktothecure4130"
+   class="youtube-link"
+   target="_blank">
+
+    <span class="link-text">Highlights</span>
+
+    <span class="youtube-icon">
+        <span class="youtube-pill">▶</span>
+    </span>
+
+</a>
+  </nav>
+  <section class="box">
+  <img src="LttC.png" alt="Link to the Cure Logo" class="logo">
+
+  <p class="tagline">Charity Speedrunning Showcase</p>
+  <p><strong>[ June 5th - 7th, 2026 ]</strong></p>
+  </section>
+
+  <section class="box">
+    <h2>Live Stream</h2>
+
+    <div class="stream-wrapper">
+      <iframe
+      src="https://player.twitch.tv/?channel=linktothecure&parent=linktothecure.org&parent=linktothecure.github.io"
+      width="100%"
+      height="480"
+      allowfullscreen="true"
+      scrolling="no"
+      frameborder="0">
+      </iframe>
+    </div>
+  <p class="small-note">
+  Having trouble with the embedded player? Use the Watch on Twitch button below.
+  </p>
+    <a class="button" href="https://twitch.tv/linktothecure" target="_blank">
+      Watch on Twitch
+    </a>
+  </section>
+
+  <section class="box">
+
+  <div class="two-column">
+
+    <div class="small-box">
+      <h2>Donate</h2>
+
+      <p>Help us support Child's Play.</p>
+
+      <a class="button"
+         href="results.html"
+         target="_blank">
+         Event Results
+      </a>
+    </div>
+
+    <div class="small-box">
+      <h2>Now Playing</h2>
+
+      <p><strong>Current:</strong>
+        <span id="now-game">Loading...</span>
+      </p>
+
+      <p><strong>Up Next:</strong>
+        <span id="next-game">Loading...</span>
+      </p>
+    </div>
+
+  </div>
+
+  <div class="charity-info">
+
+    <h2>About Child's Play</h2>
+
+    <p>
+      Link to the Cure proudly supports Child's Play, a charity focused on bringing comfort and joy to children in hospitals through games and play. Since 2003,
+      Child's Play has helped provide games, toys, books, and technology
+      to pediatric hospitals and shelters worldwide.
+    </p>
+
+    <a class="button"
+       href="https://childsplaycharity.org/site/about"
+       target="_blank">
+       Learn More
+    </a>
+    <p class="disclaimer">
+      All donations made during Link to the Cure go directly to Child's Play through the event's fundraising platforms.
+    </p>
+  </div>
+
+</section>
+
+<section id="schedule">
+  <section class="box">
+
+  <section class="box countdown-box">
+  <h2>Countdown to Link to the Cure</h2>
+  <div id="countdown">Loading...</div>
+  </section>
+    
+  <div class="box">
+
+  <h2>Link to the Cure 2026 Has Concluded</h2>
+
+  <p>
+    Thank you to everyone who ran, volunteered, watched, donated, and cheered us on throughout the weekend.
+  </p>
+
+  <p>
+    Together, our community raised <strong>$1,204</strong> for Child's Play.
+  </p>
+
+  <p>
+    We are incredibly grateful for the support of our runners, viewers, moderators, volunteers, and the Child's Play team.
+  </p>
+
+  <p>
+    Planning for Link to the Cure 2027 is already underway, and we're excited to continue growing this amazing community.
+  </p>
+
+  <a class="button"
+     href="https://www.youtube.com/@linktothecure4130"
+     target="_blank">
+     Watch Highlights
+  </a>
+
+</div>
+  </section>
+
+  <section class="box">
+    <h2>About</h2>
+    <p>
+      Link to the Cure is a community-driven charity speedrunning event
+      raising money for Child’s Play. Join us for a weekend of games,
+      speedruns, and giving back.
+    </p>
+  </section>
+
+  <footer>
+    Twitch • Discord • Donation Link • Credits
+  </footer>
+<script>
+
+  function formatTime(timestamp) {
+  const date = new Date(timestamp * 1000);
+  return date.toLocaleString("en-US", {
+    weekday: "short",
+    hour: "numeric",
+    minute: "2-digit"
+  });
+}
+
+function renderSchedule(items) {
+  const tableBody = document.querySelector("#schedule-table tbody");
+  tableBody.innerHTML = "";
+
+  items.forEach(item => {
+    const row = document.createElement("tr");
+
+    const timeCell = document.createElement("td");
+    timeCell.textContent = formatTime(item.scheduled_t);
+
+    const runCell = document.createElement("td");
+    runCell.textContent = item.data[0];
+
+    row.appendChild(timeCell);
+    row.appendChild(runCell);
+
+    tableBody.appendChild(row);
+  });
+}
+</script>
+ <script>
+  const eventDate = new Date("2026-06-05T18:00:00-04:00").getTime();
+
+  function updateCountdown() {
+    const now = new Date().getTime();
+    const distance = eventDate - now;
+
+    if (distance <= 0) {
+    document.getElementById("countdown").innerHTML =
+    "Link to the Cure 2026 has concluded. Thank you for helping us raise $1,204 for Child's Play!";
+    return;
+    }
+
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((distance / (1000 * 60)) % 60);
+
+    document.getElementById("countdown").innerHTML =
+      `${days} days, ${hours} hours, ${minutes} minutes`;
+  }
+
+  updateCountdown();
+  setInterval(updateCountdown, 60000);
+</script> 
+</body>
+</html>
