@@ -337,4 +337,14 @@ footer {
     font-size: 1.5rem;
   }
 }
+/* ===== SCHEDULE DAY BREAKS ===== */
+
+.schedule-marker {
+    color: #f3cf68;
+    font-size: 1.1rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+    padding: 14px 10px !important;
+    background: rgba(0, 0, 0, 0.18);
+}
 ```
