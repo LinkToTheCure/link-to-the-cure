@@ -291,6 +291,10 @@ fetch("schedule-ng.json")
 
         renderSchedule(items);
         updateNowPlaying(items);
+
+        setInterval(() => {
+            updateNowPlaying(items);
+        }, 60000);
     })
     .catch(error => {
         console.error("Could not load NG+ schedule:", error);
@@ -305,7 +309,7 @@ fetch("schedule-ng.json")
 
     if (distance <= 0) {
     document.getElementById("countdown").innerHTML =
-    "Link to the Cure 2026 has concluded. Thank you for helping us raise $1,204 for Child's Play!";
+    "Link to the Cure NG+ is LIVE!";
     return;
     }
 
