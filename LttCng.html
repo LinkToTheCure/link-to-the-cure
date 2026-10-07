@@ -250,7 +250,29 @@ function renderSchedule(items) {
         timeCell.textContent = formatTime(item.scheduled_t);
 
         const runCell = document.createElement("td");
-        runCell.textContent = item.data[0];
+const description = item.data[0];
+
+// Special schedule markers such as END OF DAY ONE
+if (description.startsWith("~")) {
+    runCell.innerHTML = `<strong>${description}</strong>`;
+    runCell.classList.add("schedule-marker");
+} else {
+    // Horaro format: Runner playing "Game" on Platform
+    const match = description.match(/^(.*?) playing "(.*?)" on (.*)$/);
+
+    if (match) {
+        const runner = match[1];
+        const game = match[2];
+        const platform = match[3];
+
+        runCell.innerHTML =
+            `<strong>${game}</strong><br>` +
+            `<span class="schedule-details">${runner} • ${platform}</span>`;
+    } else {
+        // If an entry doesn't match the normal format, display it unchanged
+        runCell.textContent = description;
+    }
+}
 
         row.appendChild(timeCell);
         row.appendChild(runCell);
