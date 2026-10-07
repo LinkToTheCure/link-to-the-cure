@@ -253,9 +253,15 @@ function renderSchedule(items) {
 const description = item.data[0];
 
 // Special schedule markers such as END OF DAY ONE
+// Special schedule markers such as END OF DAY ONE
 if (description.startsWith("~")) {
     runCell.innerHTML = `<strong>${description}</strong>`;
+    runCell.colSpan = 2;
     runCell.classList.add("schedule-marker");
+
+    row.appendChild(runCell);
+    tableBody.appendChild(row);
+    return;
 } else {
     // Horaro format: Runner playing "Game" on Platform
     const match = description.match(/^(.*?) playing "(.*?)" on (.*)$/);
