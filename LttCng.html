@@ -208,35 +208,75 @@
     Twitch • Discord • Donation Link • Credits
   </footer>
 <script>
+function formatTime(timestamp) {
+    const date = new Date(timestamp * 1000);
 
-  function formatTime(timestamp) {
-  const date = new Date(timestamp * 1000);
-  return date.toLocaleString("en-US", {
-    weekday: "short",
-    hour: "numeric",
-    minute: "2-digit"
-  });
+    return date.toLocaleString("en-US", {
+        weekday: "short",
+        hour: "numeric",
+        minute: "2-digit"
+    });
 }
 
 function renderSchedule(items) {
-  const tableBody = document.querySelector("#schedule-table tbody");
-  tableBody.innerHTML = "";
+    const tableBody = document.querySelector("#schedule-table tbody");
 
-  items.forEach(item => {
-    const row = document.createElement("tr");
+    if (!tableBody) return;
 
-    const timeCell = document.createElement("td");
-    timeCell.textContent = formatTime(item.scheduled_t);
+    tableBody.innerHTML = "";
 
-    const runCell = document.createElement("td");
-    runCell.textContent = item.data[0];
+    items.forEach(item => {
+        const row = document.createElement("tr");
 
-    row.appendChild(timeCell);
-    row.appendChild(runCell);
+        const timeCell = document.createElement("td");
+        timeCell.textContent = formatTime(item.scheduled_t);
 
-    tableBody.appendChild(row);
-  });
+        const runCell = document.createElement("td");
+        runCell.textContent = item.data[0];
+
+        row.appendChild(timeCell);
+        row.appendChild(runCell);
+
+        tableBody.appendChild(row);
+    });
 }
+
+function updateNowPlaying(items) {
+    const now = Math.floor(Date.now() / 1000);
+
+    let current = null;
+    let next = null;
+
+    for (let i = 0; i < items.length; i++) {
+        if (items[i].scheduled_t <= now) {
+            current = items[i];
+            next = items[i + 1] || null;
+        } else {
+            if (!current) {
+                next = items[i];
+            }
+            break;
+        }
+    }
+
+    document.getElementById("now-game").textContent =
+        current ? current.data[0] : "Event has not started yet";
+
+    document.getElementById("next-game").textContent =
+        next ? next.data[0] : "No upcoming run";
+}
+
+fetch("schedule-ng.json")
+    .then(response => response.json())
+    .then(data => {
+        const items = data.schedule.items;
+
+        renderSchedule(items);
+        updateNowPlaying(items);
+    })
+    .catch(error => {
+        console.error("Could not load NG+ schedule:", error);
+    });
 </script>
  <script>
   const eventDate = new Date("2026-06-05T18:00:00-04:00").getTime();
