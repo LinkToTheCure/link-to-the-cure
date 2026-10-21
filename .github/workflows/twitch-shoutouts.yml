@@ -1,94 +1,76 @@
+
 name: Twitch Donation Shoutouts
 
 on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  test-shoutout-system:
-    runs-on: windows-latest
+  preview-shoutouts:
+    runs-on: ubuntu-latest
 
     steps:
       - name: Download repository files
         uses: actions/checkout@v4
 
-      - name: Check Zeffy for new donations
-        shell: pwsh
+      - name: Preview new donation shoutouts
+        shell: python
         env:
           ZEFFY_API_KEY: ${{ secrets.ZEFFY_API_KEY }}
         run: |
-          $ErrorActionPreference = "Stop"
+          import os
+          import json
+          import urllib.request
 
-          $processed = @(
-            Get-Content "announced-donations.json" -Raw |
-              ConvertFrom-Json
+          campaign_id = "00a99422-7c15-4c24-9f9e-6255af83d7a4"
+
+          api_key = os.environ.get("ZEFFY_API_KEY", "").strip()
+          if not api_key:
+              raise RuntimeError("Zeffy API key is missing")
+
+          with open("announced-donations.json", encoding="utf-8") as file:
+              processed = set(json.load(file))
+
+          url = (
+              "https://api.zeffy.com/api/v1/payments"
+              f"?campaign={campaign_id}&status=succeeded&limit=100"
           )
 
-          $headers = @{
-            Authorization = "Bearer $env:ZEFFY_API_KEY"
-            Accept = "application/json"
-          }
-
-          $response = Invoke-RestMethod `
-            -Uri "https://api.zeffy.com/api/v1/payments?campaign=00a99422-7c15-4c24-9f9e-6255af83d7a4&status=succeeded&limit=100" `
-            -Headers $headers
-
-          $payments = @($response.data)
-          $newPayments = @(
-            $payments | Where-Object {
-              $_.id -notin $processed
-            }
+          request = urllib.request.Request(
+              url,
+              headers={
+                  "Authorization": "Bearer " + api_key,
+                  "Accept": "application/json"
+              }
           )
 
-          Write-Host "Previously processed donations: $($processed.Count)"
-          Write-Host "Successful donations retrieved: $($payments.Count)"
-          Write-Host "New donations awaiting shoutouts: $($newPayments.Count)"
-          Write-Host "Observation mode: no donation shoutouts sent."
+          with urllib.request.urlopen(request, timeout=30) as response:
+              payments = json.load(response).get("data", [])
 
-      - name: Test Twitch chat connection
-        shell: pwsh
-        env:
-          TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
-          TWITCH_ACCESS_TOKEN: ${{ secrets.TWITCH_ACCESS_TOKEN }}
-        run: |
-          $ErrorActionPreference = "Stop"
+          new_payments = [
+              payment for payment in payments
+              if payment.get("id") not in processed
+          ]
 
-          if (-not $env:TWITCH_CLIENT_ID -or -not $env:TWITCH_ACCESS_TOKEN) {
-            throw "Twitch credentials are missing."
-          }
+          print(f"Previously announced: {len(processed)}")
+          print(f"Successful payments retrieved: {len(payments)}")
+          print(f"New donations: {len(new_payments)}")
 
-          $headers = @{
-            Authorization = "Bearer $env:TWITCH_ACCESS_TOKEN"
-            "Client-Id" = $env:TWITCH_CLIENT_ID
-          }
+          for payment in new_payments:
+              # Do not use the donor's legal name or email.
+              # The public nickname field will be added after
+              # its API structure is confirmed by a test donation.
+              shoutout_name = "an anonymous supporter"
 
-          $user = Invoke-RestMethod `
-            -Uri "https://api.twitch.tv/helix/users" `
-            -Headers $headers
+              message = (
+                  f"Thank you to {shoutout_name} "
+                  "for supporting Link to the Cure!"
+              )
 
-          if ($user.data[0].login -ne "linktothecure") {
-            throw "Unexpected Twitch account. Message not sent."
-          }
+              print("Prepared shoutout:", message)
 
-          $id = $user.data[0].id
-
-          $body = @{
-            broadcaster_id = $id
-            sender_id = $id
-            message = "Link to the Cure donation system: Twitch connection test successful!"
-          } | ConvertTo-Json
-
-          $result = Invoke-RestMethod `
-            -Uri "https://api.twitch.tv/helix/chat/messages" `
-            -Method Post `
-            -Headers $headers `
-            -ContentType "application/json" `
-            -Body $body
-
-          if ($result.data[0].is_sent -ne $true) {
-            throw "Twitch did not confirm delivery."
-          }
-
-          Write-Host "Twitch test message sent successfully!"
+          print("Observation mode only.")
+          print("No Twitch messages sent.")
+          print("No donation history changed.")
