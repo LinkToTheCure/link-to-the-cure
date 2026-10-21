@@ -106,7 +106,7 @@ jobs:
               }
             }
 
-            $message = "Thank you to $shoutoutName for supporting Link to the Cure!"
+            $message = "Thank you to $shoutoutName for supporting Wayout Recovery Society through Link to the Cure!"
 
             $body = @{
               broadcaster_id = $twitchUserId
