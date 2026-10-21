@@ -7,25 +7,37 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: twitch-donation-shoutouts
+  cancel-in-progress: false
+
 jobs:
-  verify-shoutout-answer:
+  announce-donations:
     runs-on: windows-latest
 
     steps:
       - name: Download repository files
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true
 
-      - name: Verify optional Twitch nickname
+      - name: Announce new donations
         shell: pwsh
         env:
           ZEFFY_API_KEY: ${{ secrets.ZEFFY_API_KEY }}
+          TWITCH_ACCESS_TOKEN: ${{ secrets.TWITCH_ACCESS_TOKEN }}
+          TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
         run: |
           $ErrorActionPreference = "Stop"
 
-          $apiKey = $env:ZEFFY_API_KEY.Trim()
-
-          if (-not $apiKey) {
-            throw "Zeffy API key is missing."
+          foreach ($name in @(
+            "ZEFFY_API_KEY",
+            "TWITCH_ACCESS_TOKEN",
+            "TWITCH_CLIENT_ID"
+          )) {
+            if (-not (Get-Item "Env:$name").Value) {
+              throw "Missing credential: $name"
+            }
           }
 
           $processed = @(
@@ -33,55 +45,106 @@ jobs:
               ConvertFrom-Json
           )
 
-          $headers = @{
-            Authorization = "Bearer $apiKey"
+          $zeffyHeaders = @{
+            Authorization = "Bearer $($env:ZEFFY_API_KEY.Trim())"
             Accept = "application/json"
           }
 
           $url = "https://api.zeffy.com/api/v1/payments?campaign=00a99422-7c15-4c24-9f9e-6255af83d7a4&status=succeeded&limit=100"
 
-          $response = Invoke-RestMethod -Uri $url -Headers $headers
+          $response = Invoke-RestMethod `
+            -Uri $url `
+            -Headers $zeffyHeaders
+
+          $payments = @($response.data)
 
           $newPayments = @(
-            $response.data | Where-Object {
+            $payments | Where-Object {
               $_.id -notin $processed
-            }
+            } | Sort-Object created
           )
 
+          Write-Host "Previously announced: $($processed.Count)"
           Write-Host "New donations detected: $($newPayments.Count)"
 
+          $twitchHeaders = @{
+            Authorization = "Bearer $($env:TWITCH_ACCESS_TOKEN.Trim())"
+            "Client-Id" = $env:TWITCH_CLIENT_ID.Trim()
+          }
+
+          # Official Link to the Cure Twitch account.
+          $twitchUserId = "418888011"
+
           foreach ($payment in $newPayments) {
-            $questions = @($payment.buyer_questions)
+            $shoutoutName = "an anonymous supporter"
 
             $matchingQuestions = @(
-              $questions | Where-Object {
+              $payment.buyer_questions | Where-Object {
                 $_.question -like "*Twitch livestream shout-out*"
               }
             )
 
-            Write-Host "Matching Twitch questions: $($matchingQuestions.Count)"
+            if ($matchingQuestions.Count -eq 1) {
+              $answer = $matchingQuestions[0].answer
 
-            foreach ($question in $matchingQuestions) {
-              $answer = $question.answer
+              if ($answer -is [string] -and
+                  -not [string]::IsNullOrWhiteSpace($answer)) {
+                $candidate = $answer.Trim()
 
-              if ($null -eq $answer) {
-                Write-Host "Twitch nickname answer: missing"
-              }
-              elseif ($answer -is [string]) {
-                if ([string]::IsNullOrWhiteSpace($answer)) {
-                  Write-Host "Twitch nickname answer: empty"
+                # Keep chat messages safe and readable.
+                $candidate = $candidate -replace '[\r\n\t]', ' '
+                $candidate = $candidate -replace '[^\p{L}\p{N}_ .-]', ''
+                $candidate = $candidate.Trim()
+
+                if ($candidate.Length -gt 40) {
+                  $candidate = $candidate.Substring(0, 40)
                 }
-                else {
-                  Write-Host "Twitch nickname answer: present (text)"
+
+                if ($candidate) {
+                  $shoutoutName = $candidate
                 }
-              }
-              else {
-                Write-Host "Twitch nickname answer: present (non-text)"
               }
             }
+
+            $message = "Thank you to $shoutoutName for supporting Link to the Cure!"
+
+            $body = @{
+              broadcaster_id = $twitchUserId
+              sender_id = $twitchUserId
+              message = $message
+            } | ConvertTo-Json
+
+            $result = Invoke-RestMethod `
+              -Uri "https://api.twitch.tv/helix/chat/messages" `
+              -Method Post `
+              -Headers $twitchHeaders `
+              -ContentType "application/json" `
+              -Body $body
+
+            if (-not $result.data -or
+                $result.data[0].is_sent -ne $true) {
+              throw "Twitch did not confirm the shoutout."
+            }
+
+            Write-Host "Twitch confirmed a donation shoutout."
+
+            # Record the payment only after Twitch confirms.
+            $processed += $payment.id
+
+            $json = ConvertTo-Json -InputObject @($processed)
+            Set-Content `
+              -Path "announced-donations.json" `
+              -Value $json `
+              -Encoding utf8
+
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+            git add announced-donations.json
+            git commit -m "Record announced Twitch donation"
+            git push
+
+            Write-Host "Donation recorded as announced."
           }
 
-          Write-Host "Verification complete."
-          Write-Host "No nickname values displayed."
-          Write-Host "No Twitch messages sent."
-          Write-Host "No donation history changed."
+          Write-Host "Shoutout processing complete."
