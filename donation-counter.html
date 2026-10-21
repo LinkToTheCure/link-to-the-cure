@@ -1,1 +1,72 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Link to the Cure Donation Counter</title>
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      color: white;
+    }
+
+    #counter {
+      display: inline-block;
+      padding: 10px 18px;
+      font-size: 36px;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px black;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="counter">Loading donations...</div>
+
+  <script>
+    async function updateDonations() {
+      try {
+        const response = await fetch(
+          'donation-total.json?t=' + Date.now(),
+          { cache: 'no-store' }
+        );
+
+        if (!response.ok) {
+          throw new Error('Unable to load donation total');
+        }
+
+        const data = await response.json();
+
+        const formatted = Number(data.total).toLocaleString(
+          'en-CA',
+          {
+            style: 'currency',
+            currency: 'CAD'
+          }
+        );
+
+        document.getElementById('counter').textContent =
+          'Raised: ' + formatted;
+
+      } catch (error) {
+        console.error('Donation counter update failed:', error);
+      }
+    }
+
+    updateDonations();
+
+    setInterval(updateDonations, 30000);
+  </script>
+</body>
+</html>
+
