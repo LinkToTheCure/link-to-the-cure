@@ -9,68 +9,59 @@ permissions:
 
 jobs:
   preview-shoutouts:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - name: Download repository files
         uses: actions/checkout@v4
 
       - name: Preview new donation shoutouts
-        shell: python
+        shell: pwsh
         env:
           ZEFFY_API_KEY: ${{ secrets.ZEFFY_API_KEY }}
         run: |
-          import os
-          import json
-          import urllib.request
+          $ErrorActionPreference = "Stop"
 
-          campaign_id = "00a99422-7c15-4c24-9f9e-6255af83d7a4"
+          if (-not $env:ZEFFY_API_KEY) {
+            throw "Zeffy API key is missing."
+          }
 
-          api_key = os.environ.get("ZEFFY_API_KEY", "").strip()
-          if not api_key:
-              raise RuntimeError("Zeffy API key is missing")
-
-          with open("announced-donations.json", encoding="utf-8") as file:
-              processed = set(json.load(file))
-
-          url = (
-              "https://api.zeffy.com/api/v1/payments"
-              f"?campaign={campaign_id}&status=succeeded&limit=100"
+          $processed = @(
+            Get-Content "announced-donations.json" -Raw |
+              ConvertFrom-Json
           )
 
-          request = urllib.request.Request(
-              url,
-              headers={
-                  "Authorization": "Bearer " + api_key,
-                  "Accept": "application/json"
-              }
+          $headers = @{
+            Authorization = "Bearer $($env:ZEFFY_API_KEY.Trim())"
+            Accept = "application/json"
+          }
+
+          $url = "https://api.zeffy.com/api/v1/payments?campaign=00a99422-7c15-4c24-9f9e-6255af83d7a4&status=succeeded&limit=100"
+
+          $response = Invoke-RestMethod `
+            -Uri $url `
+            -Headers $headers
+
+          $payments = @($response.data)
+
+          $newPayments = @(
+            $payments | Where-Object {
+              $_.id -notin $processed
+            }
           )
 
-          with urllib.request.urlopen(request, timeout=30) as response:
-              payments = json.load(response).get("data", [])
+          Write-Host "Previously announced: $($processed.Count)"
+          Write-Host "Successful payments retrieved: $($payments.Count)"
+          Write-Host "New donations: $($newPayments.Count)"
 
-          new_payments = [
-              payment for payment in payments
-              if payment.get("id") not in processed
-          ]
+          foreach ($payment in $newPayments) {
+            $shoutoutName = "an anonymous supporter"
 
-          print(f"Previously announced: {len(processed)}")
-          print(f"Successful payments retrieved: {len(payments)}")
-          print(f"New donations: {len(new_payments)}")
+            $message = "Thank you to $shoutoutName for supporting Link to the Cure!"
 
-          for payment in new_payments:
-              # Do not use the donor's legal name or email.
-              # The public nickname field will be added after
-              # its API structure is confirmed by a test donation.
-              shoutout_name = "an anonymous supporter"
+            Write-Host "Prepared shoutout: $message"
+          }
 
-              message = (
-                  f"Thank you to {shoutout_name} "
-                  "for supporting Link to the Cure!"
-              )
-
-              print("Prepared shoutout:", message)
-
-          print("Observation mode only.")
-          print("No Twitch messages sent.")
-          print("No donation history changed.")
+          Write-Host "Observation mode only."
+          Write-Host "No Twitch messages sent."
+          Write-Host "No donation history changed."
