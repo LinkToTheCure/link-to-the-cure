@@ -3,8 +3,6 @@ name: Twitch Donation Shoutouts
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '2/5 * * * *'
 
 permissions:
   contents: write
@@ -108,7 +106,25 @@ jobs:
               }
             }
 
-            $message = "Thank you to $shoutoutName for supporting Wayout Recovery Society through Link to the Cure!"
+            # Zeffy reports the payment amount in cents.
+            if ($null -eq $payment.amount -or
+                $null -eq $payment.currency) {
+              throw "Payment is missing amount or currency."
+            }
+
+            $amount = ([decimal]$payment.amount) / 100
+            $formattedAmount = $amount.ToString(
+              "F2",
+              [System.Globalization.CultureInfo]::InvariantCulture
+            )
+
+            $currency = [string]$payment.currency
+
+            if ($currency -ne "CAD") {
+              throw "Unexpected payment currency."
+            }
+
+            $message = "Thank you to $shoutoutName for contributing `$$formattedAmount CAD in support of Wayout Recovery Society through Link to the Cure!"
 
             $body = @{
               broadcaster_id = $twitchUserId
@@ -144,6 +160,7 @@ jobs:
 
             git add announced-donations.json
             git commit -m "Record announced Twitch donation"
+            git pull --rebase
             git push
 
             Write-Host "Donation recorded as announced."
