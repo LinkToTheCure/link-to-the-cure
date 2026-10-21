@@ -1,0 +1,38 @@
+name: Twitch Token Refresh
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-credentials:
+    runs-on: windows-latest
+
+    steps:
+      - name: Verify refresh credentials
+        shell: pwsh
+        env:
+          TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
+          TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
+          TWITCH_REFRESH_TOKEN: ${{ secrets.TWITCH_REFRESH_TOKEN }}
+          LTTC_SECRETS_TOKEN: ${{ secrets.LTTC_SECRETS_TOKEN }}
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          $required = @(
+            "TWITCH_CLIENT_ID"
+            "TWITCH_CLIENT_SECRET"
+            "TWITCH_REFRESH_TOKEN"
+            "LTTC_SECRETS_TOKEN"
+          )
+
+          foreach ($name in $required) {
+            if (-not (Get-Item "Env:$name").Value) {
+              throw "Missing credential: $name"
+            }
+          }
+
+          Write-Host "All four credentials are available."
+          Write-Host "No tokens refreshed or changed."
