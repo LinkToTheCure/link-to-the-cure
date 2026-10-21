@@ -8,21 +8,22 @@ permissions:
   contents: read
 
 jobs:
-  preview-shoutouts:
+  inspect-shoutout-fields:
     runs-on: windows-latest
 
     steps:
       - name: Download repository files
         uses: actions/checkout@v4
 
-      - name: Preview new donation shoutouts
+      - name: Inspect Zeffy question structure
         shell: pwsh
         env:
           ZEFFY_API_KEY: ${{ secrets.ZEFFY_API_KEY }}
         run: |
           $ErrorActionPreference = "Stop"
 
-          if (-not $env:ZEFFY_API_KEY) {
+          $apiKey = $env:ZEFFY_API_KEY.Trim()
+          if (-not $apiKey) {
             throw "Zeffy API key is missing."
           }
 
@@ -32,36 +33,57 @@ jobs:
           )
 
           $headers = @{
-            Authorization = "Bearer $($env:ZEFFY_API_KEY.Trim())"
+            Authorization = "Bearer $apiKey"
             Accept = "application/json"
           }
 
           $url = "https://api.zeffy.com/api/v1/payments?campaign=00a99422-7c15-4c24-9f9e-6255af83d7a4&status=succeeded&limit=100"
 
-          $response = Invoke-RestMethod `
-            -Uri $url `
-            -Headers $headers
-
-          $payments = @($response.data)
+          $response = Invoke-RestMethod -Uri $url -Headers $headers
 
           $newPayments = @(
-            $payments | Where-Object {
+            $response.data | Where-Object {
               $_.id -notin $processed
             }
           )
 
-          Write-Host "Previously announced: $($processed.Count)"
-          Write-Host "Successful payments retrieved: $($payments.Count)"
-          Write-Host "New donations: $($newPayments.Count)"
+          Write-Host "New donations detected: $($newPayments.Count)"
 
           foreach ($payment in $newPayments) {
-            $shoutoutName = "an anonymous supporter"
+            Write-Host "Inspecting donation response structure:"
 
-            $message = "Thank you to $shoutoutName for supporting Link to the Cure!"
+            foreach ($field in $payment.PSObject.Properties) {
+              Write-Host "Top-level field: $($field.Name)"
+            }
 
-            Write-Host "Prepared shoutout: $message"
+            if ($payment.PSObject.Properties.Name -contains "buyer_questions") {
+              Write-Host "Buyer questions field exists."
+
+              $questions = $payment.buyer_questions
+
+              if ($null -eq $questions) {
+                Write-Host "Buyer questions: null"
+              }
+              elseif ($questions -is [array]) {
+                Write-Host "Buyer questions: array"
+
+                foreach ($question in $questions) {
+                  foreach ($property in $question.PSObject.Properties) {
+                    Write-Host "Question property: $($property.Name)"
+                  }
+                }
+              }
+              else {
+                Write-Host "Buyer questions: object"
+
+                foreach ($property in $questions.PSObject.Properties) {
+                  Write-Host "Question property: $($property.Name)"
+                }
+              }
+            }
           }
 
-          Write-Host "Observation mode only."
+          Write-Host "Structure inspection complete."
+          Write-Host "No donor information displayed."
           Write-Host "No Twitch messages sent."
           Write-Host "No donation history changed."
