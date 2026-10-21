@@ -11,28 +11,31 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Verify refresh credentials
+      - name: Verify GitHub secret management access
         shell: pwsh
         env:
-          TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
-          TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
-          TWITCH_REFRESH_TOKEN: ${{ secrets.TWITCH_REFRESH_TOKEN }}
           LTTC_SECRETS_TOKEN: ${{ secrets.LTTC_SECRETS_TOKEN }}
         run: |
           $ErrorActionPreference = "Stop"
 
-          $required = @(
-            "TWITCH_CLIENT_ID"
-            "TWITCH_CLIENT_SECRET"
-            "TWITCH_REFRESH_TOKEN"
-            "LTTC_SECRETS_TOKEN"
-          )
-
-          foreach ($name in $required) {
-            if (-not (Get-Item "Env:$name").Value) {
-              throw "Missing credential: $name"
-            }
+          if (-not $env:LTTC_SECRETS_TOKEN) {
+            throw "GitHub secret management token is missing."
           }
 
-          Write-Host "All four credentials are available."
-          Write-Host "No tokens refreshed or changed."
+          $headers = @{
+            Authorization = "Bearer $env:LTTC_SECRETS_TOKEN"
+            Accept = "application/vnd.github+json"
+            "X-GitHub-Api-Version" = "2022-11-28"
+          }
+
+          $response = Invoke-RestMethod `
+            -Uri "https://api.github.com/repos/LinkToTheCure/link-to-the-cure/actions/secrets/public-key" `
+            -Headers $headers
+
+          if (-not $response.key_id -or -not $response.key) {
+            throw "GitHub did not return a usable encryption key."
+          }
+
+          Write-Host "GitHub secret management access verified."
+          Write-Host "No secrets changed."
+          Write-Host "No Twitch tokens refreshed."
