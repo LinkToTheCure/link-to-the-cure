@@ -1,0 +1,29 @@
+name: Twitch Donation Shoutouts
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-shoutout-system:
+    runs-on: windows-latest
+
+    steps:
+      - name: Download repository files
+        uses: actions/checkout@v4
+
+      - name: Verify donation history
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          $ids = @(
+            Get-Content "announced-donations.json" -Raw |
+              ConvertFrom-Json
+          )
+
+          Write-Host "Donation history loaded successfully."
+          Write-Host "Previously processed donations: $($ids.Count)"
+          Write-Host "Twitch shoutout system diagnostic complete."
