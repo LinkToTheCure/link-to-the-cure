@@ -8,14 +8,14 @@ permissions:
   contents: read
 
 jobs:
-  inspect-shoutout-fields:
+  verify-shoutout-answer:
     runs-on: windows-latest
 
     steps:
       - name: Download repository files
         uses: actions/checkout@v4
 
-      - name: Inspect Zeffy question structure
+      - name: Verify optional Twitch nickname
         shell: pwsh
         env:
           ZEFFY_API_KEY: ${{ secrets.ZEFFY_API_KEY }}
@@ -23,6 +23,7 @@ jobs:
           $ErrorActionPreference = "Stop"
 
           $apiKey = $env:ZEFFY_API_KEY.Trim()
+
           if (-not $apiKey) {
             throw "Zeffy API key is missing."
           }
@@ -50,40 +51,37 @@ jobs:
           Write-Host "New donations detected: $($newPayments.Count)"
 
           foreach ($payment in $newPayments) {
-            Write-Host "Inspecting donation response structure:"
+            $questions = @($payment.buyer_questions)
 
-            foreach ($field in $payment.PSObject.Properties) {
-              Write-Host "Top-level field: $($field.Name)"
-            }
-
-            if ($payment.PSObject.Properties.Name -contains "buyer_questions") {
-              Write-Host "Buyer questions field exists."
-
-              $questions = $payment.buyer_questions
-
-              if ($null -eq $questions) {
-                Write-Host "Buyer questions: null"
+            $matchingQuestions = @(
+              $questions | Where-Object {
+                $_.question -like "*Twitch livestream shout-out*"
               }
-              elseif ($questions -is [array]) {
-                Write-Host "Buyer questions: array"
+            )
 
-                foreach ($question in $questions) {
-                  foreach ($property in $question.PSObject.Properties) {
-                    Write-Host "Question property: $($property.Name)"
-                  }
+            Write-Host "Matching Twitch questions: $($matchingQuestions.Count)"
+
+            foreach ($question in $matchingQuestions) {
+              $answer = $question.answer
+
+              if ($null -eq $answer) {
+                Write-Host "Twitch nickname answer: missing"
+              }
+              elseif ($answer -is [string]) {
+                if ([string]::IsNullOrWhiteSpace($answer)) {
+                  Write-Host "Twitch nickname answer: empty"
+                }
+                else {
+                  Write-Host "Twitch nickname answer: present (text)"
                 }
               }
               else {
-                Write-Host "Buyer questions: object"
-
-                foreach ($property in $questions.PSObject.Properties) {
-                  Write-Host "Question property: $($property.Name)"
-                }
+                Write-Host "Twitch nickname answer: present (non-text)"
               }
             }
           }
 
-          Write-Host "Structure inspection complete."
-          Write-Host "No donor information displayed."
+          Write-Host "Verification complete."
+          Write-Host "No nickname values displayed."
           Write-Host "No Twitch messages sent."
           Write-Host "No donation history changed."
