@@ -50,3 +50,17 @@ jobs:
           Write-Host "Successful donations retrieved: $($payments.Count)"
           Write-Host "New donations awaiting shoutouts: $($newPayments.Count)"
           Write-Host "Observation mode: no messages sent."
+                - name: Verify Twitch application credentials
+        shell: pwsh
+        env:
+          TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
+          TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          if (-not $env:TWITCH_CLIENT_ID -or -not $env:TWITCH_CLIENT_SECRET) {
+            throw "Twitch application credentials are missing."
+          }
+
+          Write-Host "Twitch application credentials are available."
+          Write-Host "Refresh token untouched. No Twitch messages sent."
