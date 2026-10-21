@@ -21,10 +21,6 @@ jobs:
         run: |
           $ErrorActionPreference = "Stop"
 
-          if (-not $env:ZEFFY_API_KEY) {
-            throw "Zeffy API key is missing."
-          }
-
           $processed = @(
             Get-Content "announced-donations.json" -Raw |
               ConvertFrom-Json
@@ -49,19 +45,50 @@ jobs:
           Write-Host "Previously processed donations: $($processed.Count)"
           Write-Host "Successful donations retrieved: $($payments.Count)"
           Write-Host "New donations awaiting shoutouts: $($newPayments.Count)"
-          Write-Host "Observation mode: no messages sent."
+          Write-Host "Observation mode: no donation shoutouts sent."
 
-      - name: Verify Twitch application credentials
+      - name: Test Twitch chat connection
         shell: pwsh
         env:
           TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
-          TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
+          TWITCH_ACCESS_TOKEN: ${{ secrets.TWITCH_ACCESS_TOKEN }}
         run: |
           $ErrorActionPreference = "Stop"
 
-          if (-not $env:TWITCH_CLIENT_ID -or -not $env:TWITCH_CLIENT_SECRET) {
-            throw "Twitch application credentials are missing."
+          if (-not $env:TWITCH_CLIENT_ID -or -not $env:TWITCH_ACCESS_TOKEN) {
+            throw "Twitch credentials are missing."
           }
 
-          Write-Host "Twitch application credentials are available."
-          Write-Host "Refresh token untouched. No Twitch messages sent."
+          $headers = @{
+            Authorization = "Bearer $env:TWITCH_ACCESS_TOKEN"
+            "Client-Id" = $env:TWITCH_CLIENT_ID
+          }
+
+          $user = Invoke-RestMethod `
+            -Uri "https://api.twitch.tv/helix/users" `
+            -Headers $headers
+
+          if ($user.data[0].login -ne "linktothecure") {
+            throw "Unexpected Twitch account. Message not sent."
+          }
+
+          $id = $user.data[0].id
+
+          $body = @{
+            broadcaster_id = $id
+            sender_id = $id
+            message = "Link to the Cure donation system: Twitch connection test successful!"
+          } | ConvertTo-Json
+
+          $result = Invoke-RestMethod `
+            -Uri "https://api.twitch.tv/helix/chat/messages" `
+            -Method Post `
+            -Headers $headers `
+            -ContentType "application/json" `
+            -Body $body
+
+          if ($result.data[0].is_sent -ne $true) {
+            throw "Twitch did not confirm delivery."
+          }
+
+          Write-Host "Twitch test message sent successfully!"
