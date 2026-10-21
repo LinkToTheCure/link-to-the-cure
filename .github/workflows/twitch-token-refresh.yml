@@ -1,3 +1,4 @@
+
 name: Twitch Token Refresh
 
 on:
@@ -6,36 +7,135 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: twitch-token-refresh
+  cancel-in-progress: false
+
 jobs:
-  check-credentials:
-    runs-on: windows-latest
+  refresh-tokens:
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Verify GitHub secret management access
-        shell: pwsh
+      - name: Install encryption library
+        run: python -m pip install pynacl
+
+      - name: Refresh Twitch credentials and save securely
         env:
+          TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
+          TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
+          TWITCH_REFRESH_TOKEN: ${{ secrets.TWITCH_REFRESH_TOKEN }}
           LTTC_SECRETS_TOKEN: ${{ secrets.LTTC_SECRETS_TOKEN }}
+        shell: python
         run: |
-          $ErrorActionPreference = "Stop"
+          import os
+          import json
+          import base64
+          import urllib.parse
+          import urllib.request
+          from nacl import public, encoding
 
-          if (-not $env:LTTC_SECRETS_TOKEN) {
-            throw "GitHub secret management token is missing."
+          repo = "LinkToTheCure/link-to-the-cure"
+
+          required = [
+              "TWITCH_CLIENT_ID",
+              "TWITCH_CLIENT_SECRET",
+              "TWITCH_REFRESH_TOKEN",
+              "LTTC_SECRETS_TOKEN"
+          ]
+
+          for name in required:
+              if not os.environ.get(name):
+                  raise RuntimeError(f"Missing credential: {name}")
+
+          github_headers = {
+              "Authorization": "Bearer " + os.environ["LTTC_SECRETS_TOKEN"],
+              "Accept": "application/vnd.github+json",
+              "X-GitHub-Api-Version": "2022-11-28"
           }
 
-          $headers = @{
-            Authorization = "Bearer $env:LTTC_SECRETS_TOKEN"
-            Accept = "application/vnd.github+json"
-            "X-GitHub-Api-Version" = "2022-11-28"
-          }
+          def github_request(path, method="GET", payload=None):
+              data = None
+              if payload is not None:
+                  data = json.dumps(payload).encode("utf-8")
 
-          $response = Invoke-RestMethod `
-            -Uri "https://api.github.com/repos/LinkToTheCure/link-to-the-cure/actions/secrets/public-key" `
-            -Headers $headers
+              request = urllib.request.Request(
+                  "https://api.github.com/repos/" + repo + path,
+                  data=data,
+                  headers=github_headers,
+                  method=method
+              )
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  return response.status, response.read()
 
-          if (-not $response.key_id -or -not $response.key) {
-            throw "GitHub did not return a usable encryption key."
-          }
+          # Check GitHub permissions before rotating Twitch tokens.
+          _, key_response = github_request(
+              "/actions/secrets/public-key"
+          )
+          key_info = json.loads(key_response)
 
-          Write-Host "GitHub secret management access verified."
-          Write-Host "No secrets changed."
-          Write-Host "No Twitch tokens refreshed."
+          if not key_info.get("key") or not key_info.get("key_id"):
+              raise RuntimeError("GitHub encryption key unavailable")
+
+          public_key = public.PublicKey(
+              key_info["key"].encode("utf-8"),
+              encoding.Base64Encoder()
+          )
+          sealed_box = public.SealedBox(public_key)
+
+          # Ask Twitch for replacement credentials.
+          form = urllib.parse.urlencode({
+              "client_id": os.environ["TWITCH_CLIENT_ID"],
+              "client_secret": os.environ["TWITCH_CLIENT_SECRET"],
+              "grant_type": "refresh_token",
+              "refresh_token": os.environ["TWITCH_REFRESH_TOKEN"]
+          }).encode("utf-8")
+
+          request = urllib.request.Request(
+              "https://id.twitch.tv/oauth2/token",
+              data=form,
+              headers={
+                  "Content-Type": "application/x-www-form-urlencoded"
+              },
+              method="POST"
+          )
+
+          with urllib.request.urlopen(request, timeout=30) as response:
+              tokens = json.load(response)
+
+          if not tokens.get("access_token") or not tokens.get("refresh_token"):
+              raise RuntimeError("Twitch returned incomplete credentials")
+
+          print("Twitch issued replacement credentials.")
+
+          # Store the refresh token first.
+          # If this fails, preserve the existing access token.
+          for name in ["TWITCH_REFRESH_TOKEN", "TWITCH_ACCESS_TOKEN"]:
+              field = (
+                  "refresh_token"
+                  if name == "TWITCH_REFRESH_TOKEN"
+                  else "access_token"
+              )
+
+              encrypted = sealed_box.encrypt(
+                  tokens[field].encode("utf-8")
+              )
+
+              payload = {
+                  "encrypted_value": base64.b64encode(
+                      encrypted
+                  ).decode("ascii"),
+                  "key_id": key_info["key_id"]
+              }
+
+              status, _ = github_request(
+                  "/actions/secrets/" + name,
+                  method="PUT",
+                  payload=payload
+              )
+
+              if status not in (201, 204):
+                  raise RuntimeError(f"Failed to update {name}")
+
+              print(f"{name} updated successfully.")
+
+          print("Twitch credential refresh completed.")
