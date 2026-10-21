@@ -14,16 +14,39 @@ jobs:
       - name: Download repository files
         uses: actions/checkout@v4
 
-      - name: Verify donation history
+      - name: Check Zeffy for new donations
         shell: pwsh
+        env:
+          ZEFFY_API_KEY: ${{ secrets.ZEFFY_API_KEY }}
         run: |
           $ErrorActionPreference = "Stop"
 
-          $ids = @(
+          if (-not $env:ZEFFY_API_KEY) {
+            throw "Zeffy API key is missing."
+          }
+
+          $processed = @(
             Get-Content "announced-donations.json" -Raw |
               ConvertFrom-Json
           )
 
-          Write-Host "Donation history loaded successfully."
-          Write-Host "Previously processed donations: $($ids.Count)"
-          Write-Host "Twitch shoutout system diagnostic complete."
+          $headers = @{
+            Authorization = "Bearer $env:ZEFFY_API_KEY"
+            Accept = "application/json"
+          }
+
+          $response = Invoke-RestMethod `
+            -Uri "https://api.zeffy.com/api/v1/payments?campaign=00a99422-7c15-4c24-9f9e-6255af83d7a4&status=succeeded&limit=100" `
+            -Headers $headers
+
+          $payments = @($response.data)
+          $newPayments = @(
+            $payments | Where-Object {
+              $_.id -notin $processed
+            }
+          )
+
+          Write-Host "Previously processed donations: $($processed.Count)"
+          Write-Host "Successful donations retrieved: $($payments.Count)"
+          Write-Host "New donations awaiting shoutouts: $($newPayments.Count)"
+          Write-Host "Observation mode: no messages sent."
