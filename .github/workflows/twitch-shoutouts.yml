@@ -58,6 +58,9 @@ jobs:
 
           $payments = @($response.data)
           Write-Host "Payments returned by Zeffy API: $($payments.Count)"
+          $testUrl = $url.Replace("&status=succeeded", "")
+          $testResponse = Invoke-RestMethod -Uri $testUrl -Headers $zeffyHeaders
+          Write-Host "Payments without status filter: $(@($testResponse.data).Count)"
 
           $newPayments = @(
             $payments | Where-Object {
