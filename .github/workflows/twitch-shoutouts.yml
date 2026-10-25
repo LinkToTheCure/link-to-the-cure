@@ -57,6 +57,7 @@ jobs:
             -Headers $zeffyHeaders
 
           $payments = @($response.data)
+          Write-Host "Payments returned by Zeffy API: $($payments.Count)"
 
           $newPayments = @(
             $payments | Where-Object {
