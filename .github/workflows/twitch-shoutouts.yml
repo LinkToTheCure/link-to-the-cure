@@ -50,6 +50,7 @@ jobs:
             Accept = "application/json"
           }
 
+          # Production query: only payments marked succeeded.
           $url = "https://api.zeffy.com/api/v1/payments?campaign=00a99422-7c15-4c24-9f9e-6255af83d7a4&status=succeeded&limit=100"
 
           $response = Invoke-RestMethod `
@@ -57,11 +58,44 @@ jobs:
             -Headers $zeffyHeaders
 
           $payments = @($response.data)
-          Write-Host "Payments returned by Zeffy API: $($payments.Count)"
-          $testUrl = $url.Replace("&status=succeeded", "")
-          $testResponse = Invoke-RestMethod -Uri $testUrl -Headers $zeffyHeaders
-          Write-Host "Payments without status filter: $(@($testResponse.data).Count)"
 
+          Write-Host "Payments returned by Zeffy API: $($payments.Count)"
+
+          # Diagnostic only: compare with payments returned
+          # when the status filter is removed.
+          # This section does not send shoutouts or change records.
+          $diagnosticUrl = $url.Replace("&status=succeeded", "")
+
+          $diagnosticResponse = Invoke-RestMethod `
+            -Uri $diagnosticUrl `
+            -Headers $zeffyHeaders
+
+          $diagnosticPayments = @($diagnosticResponse.data)
+
+          $filteredIds = @(
+            $payments | ForEach-Object { $_.id }
+          )
+
+          $excludedPayments = @(
+            $diagnosticPayments | Where-Object {
+              $_.id -notin $filteredIds
+            }
+          )
+
+          Write-Host "Payments without status filter: $($diagnosticPayments.Count)"
+          Write-Host "Payments excluded by succeeded filter: $($excludedPayments.Count)"
+
+          foreach ($payment in $excludedPayments) {
+            $status = [string]$payment.status
+
+            if ([string]::IsNullOrWhiteSpace($status)) {
+              $status = "(missing or empty)"
+            }
+
+            Write-Host "Excluded payment status: $status"
+          }
+
+          # Normal donation announcement processing.
           $newPayments = @(
             $payments | Where-Object {
               $_.id -notin $processed
@@ -117,6 +151,7 @@ jobs:
             }
 
             $amount = ([decimal]$payment.amount) / 100
+
             $formattedAmount = $amount.ToString(
               "F2",
               [System.Globalization.CultureInfo]::InvariantCulture
@@ -154,6 +189,7 @@ jobs:
             $processed += $payment.id
 
             $json = ConvertTo-Json -InputObject @($processed)
+
             Set-Content `
               -Path "announced-donations.json" `
               -Value $json `
@@ -169,5 +205,8 @@ jobs:
 
             Write-Host "Donation recorded as announced."
           }
+
+          Write-Host "Shoutout processing complete."
+
 
           Write-Host "Shoutout processing complete."
