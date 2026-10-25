@@ -198,15 +198,38 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-            git add announced-donations.json
-            git commit -m "Record announced Twitch donation"
-            git pull --rebase
-            git push
+            
+           git add announced-donations.json
+           git commit -m "Record announced Twitch donation"
 
-            Write-Host "Donation recorded as announced."
+           $pushSucceeded = $false
+
+          for ($attempt = 1; $attempt -le 5; $attempt++) {
+          Write-Host "Saving donation record (attempt $attempt of 5)..."
+
+           git pull --rebase
+
+          if ($LASTEXITCODE -ne 0) {
+          throw "Could not synchronize donation records."
           }
 
-          Write-Host "Shoutout processing complete."
+          git push
 
+          if ($LASTEXITCODE -eq 0) {
+          $pushSucceeded = $true
+          break
+          }
+
+          Write-Host "GitHub branch changed. Retrying save..."
+          Start-Sleep -Seconds 2
+          }
+
+          if (-not $pushSucceeded) {
+          throw "Could not save donation record after 5 attempts."
+          }
+
+          Write-Host "Donation recorded as announced."
+
+          }
 
           Write-Host "Shoutout processing complete."
