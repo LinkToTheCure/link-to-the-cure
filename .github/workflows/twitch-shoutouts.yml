@@ -50,7 +50,7 @@ jobs:
             Accept = "application/json"
           }
 
-          $url = "https://api.zeffy.com/api/v1/payments?campaign=00a99422-7c15-4c24-9f9e-6255af83d7a4&limit=100"
+          $url = "https://api.zeffy.com/api/v1/payments?campaign=00a99422-7c15-4c24-9f9e-6255af83d7a4&status=succeeded&limit=100"
 
           $response = Invoke-RestMethod `
             -Uri $url `
