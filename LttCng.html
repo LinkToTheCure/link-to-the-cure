@@ -178,18 +178,50 @@
   <section class="box">
 
 <!-- WAYOUT RECOVERY SOCIETY MESSAGE -->
-<div style="
-    max-width: 1000px;
-    margin: 35px auto;
-    padding: 35px;
-    background: linear-gradient(145deg, #24162f, #382044);
-    border: 2px solid #d8ae52;
-    border-radius: 20px;
-    color: #f7f0f8;
-    box-sizing: border-box;
-    text-align: left;
-    line-height: 1.8;
-">
+<!-- Decorative ribbons behind Wayout signature -->
+<svg
+    viewBox="0 0 1000 300"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    style="
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+    "
+>
+    <!-- Soft purple waves -->
+    <path
+        d="M0 125 Q180 300 390 225 T1000 125 L1000 300 L0 300 Z"
+        fill="#71447f"
+        opacity="0.15"
+    />
+
+    <path
+        d="M0 185 Q250 295 500 220 T1000 185 L1000 300 L0 300 Z"
+        fill="#9660a2"
+        opacity="0.12"
+    />
+
+    <!-- Thin flowing gold ribbons -->
+    <path
+        d="M0 135 Q180 295 400 225 T1000 145"
+        fill="none"
+        stroke="#c99a51"
+        stroke-width="3"
+        opacity="0.35"
+    />
+
+    <path
+        d="M0 205 Q260 285 500 225 T1000 205"
+        fill="none"
+        stroke="#c99a51"
+        stroke-width="2"
+        opacity="0.20"
+    />
+</svg>
 
     <h2 style="color: #f0c76a; margin-bottom: 5px;">
         A Message from Wayout Recovery Society
@@ -261,7 +293,7 @@
         <img
             src="wayouttransparent.png"
             alt="Wayout Recovery Society logo"
-            style="width: 180px; max-width: 65%; height: auto;"
+           style="position: relative; z-index: 1; width: 180px; max-width: 65%; height: auto;"
         >
 
         <div style="color: #f0c76a; font-size: 1.4rem; font-weight: bold;">
