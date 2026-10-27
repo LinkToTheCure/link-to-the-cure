@@ -1,68 +1,265 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Link to the Cure 2026 Results</title>
+  <title>Link to the Cure | 2026 Results</title>
 
   <link rel="icon" type="image/png" href="8-bitheart.png">
   <link rel="stylesheet" href="home.css">
+
+  <style>
+    /* Results page layout */
+    .results-page {
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 20px;
+      text-align: center;
+      color: #fff;
+    }
+
+    .results-logo {
+      display: block;
+      width: 300px;
+      max-width: 85%;
+      height: auto;
+      margin: 0 auto 30px;
+    }
+
+    .results-page h1 {
+      font-size: clamp(1.8rem, 4vw, 2.7rem);
+      margin-bottom: 15px;
+    }
+
+    .results-intro {
+      font-size: 1.1rem;
+      line-height: 1.7;
+      margin-bottom: 35px;
+    }
+
+    /* Two event cards */
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 25px;
+      margin: 35px 0;
+    }
+
+    .result-card {
+      background: linear-gradient(145deg, #142b3e, #1b3b50);
+      border: 2px solid #c99a51;
+      border-radius: 18px;
+      padding: 35px 25px;
+      box-sizing: border-box;
+    }
+
+    .result-date {
+      color: #e6c18a;
+      font-size: 0.9rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 15px;
+    }
+
+    .result-card h2 {
+      font-size: 1.5rem;
+      margin: 10px 0 25px;
+    }
+
+    .result-amount {
+      font-size: clamp(2.5rem, 5vw, 3.5rem);
+      font-weight: bold;
+      color: #f0c76a;
+      margin: 15px 0 5px;
+    }
+
+    .result-currency {
+      color: #d0dce5;
+      font-size: 0.95rem;
+      margin-bottom: 25px;
+    }
+
+    .result-charity {
+      font-size: 1.15rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .result-description {
+      color: #d0dce5;
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+
+    /* Thank-you section */
+    .results-thanks {
+      max-width: 850px;
+      margin: 45px auto 30px;
+      line-height: 1.8;
+      font-size: 1.05rem;
+    }
+
+    .results-actions {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin: 30px 0;
+    }
+
+    .results-footer {
+      text-align: center;
+      padding: 25px 15px;
+      color: #c3d0db;
+      font-size: 0.9rem;
+    }
+
+    /* Mobile layout */
+    @media (max-width: 700px) {
+      .results-page {
+        margin: 20px auto;
+        padding: 15px;
+      }
+
+      .results-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .result-card {
+        padding: 30px 20px;
+      }
+
+      .results-logo {
+        width: 240px;
+      }
+    }
+  </style>
 </head>
 
 <body>
+
   <nav class="navbar">
     <a href="index.html">Home</a>
-    <a href="https://twitch.tv/linktothecure" target="_blank">Twitch</a>
-    <a href="https://discord.gg/Wd9zp66AXA" target="_blank">Discord</a>
-    <a href="https://www.youtube.com/@linktothecure4130" target="_blank">Highlights</a>
+    <a href="https://twitch.tv/linktothecure" target="_blank" rel="noopener noreferrer">Twitch</a>
+    <a href="https://discord.gg/Wd9zp66AXA" target="_blank" rel="noopener noreferrer">Discord</a>
+    <a href="https://www.youtube.com/@linktothecure4130" target="_blank" rel="noopener noreferrer">Highlights</a>
   </nav>
 
-  <section class="box">
+  <main class="results-page">
+
     <img
-    src="LttC.png"
-    alt="Link to the Cure Logo"
-    class="logo"
-    style="display: block; width: 300px; max-width: 85%; height: auto; margin: 0 auto 25px;"
->
-    <h2>Link to the Cure 2026 Has Concluded</h2>
+      src="LttC.png"
+      alt="Link to the Cure logo"
+      class="results-logo"
+    >
 
-    <p>
-      Thank you to everyone who ran, volunteered, watched, donated,
-      shared, and cheered us on throughout the weekend.
+    <h1>Link to the Cure — 2026 Results</h1>
+
+    <p class="results-intro">
+      Two events. Two incredible causes. One generous community.
+      <br>
+      For the first time in our history, Link to the Cure
+      hosted two charity gaming events in a single year!
     </p>
 
-    <p>
-      Together, our community raised:
-    </p>
+    <!-- EVENT RESULTS -->
+    <div class="results-grid">
 
-    <h1>$1,204</h1>
+      <!-- MAIN EVENT -->
+      <article class="result-card">
 
-    <p>
-      for Child's Play.
-    </p>
+        <div class="result-date">June 2026</div>
 
-    <p>
-      We are incredibly grateful to our runners, viewers, moderators,
-      volunteers, donors, and to the Child's Play team for their support.
-    </p>
+        <h2>Link to the Cure 2026</h2>
 
-    <p>
-      Planning for future Link to the Cure events is already underway.
-      More information will be announced in the coming months.
-    </p>
+        <div class="result-amount">$1,204</div>
+        <div class="result-currency">USD Raised</div>
 
-    <a class="button" href="https://www.youtube.com/@linktothecure4130" target="_blank">
-      Watch Highlights
-    </a>
+        <div class="result-charity">Child's Play</div>
 
-    <a class="button" href="index.html">
-      Return Home
-    </a>
-  </section>
+        <p class="result-description">
+          Our seventh annual Link to the Cure brought
+          runners, volunteers, and viewers together
+          to support children and families through
+          the power of play.
+        </p>
 
-  <footer>
-    Link to the Cure • Thank you for supporting Child's Play
+      </article>
+
+      <!-- NEW GAME+ -->
+      <article class="result-card">
+
+        <div class="result-date">October 23–25, 2026</div>
+
+        <h2>Link to the Cure: New Game+</h2>
+
+        <div class="result-amount">$400</div>
+        <div class="result-currency">CAD Raised</div>
+
+        <div class="result-charity">Wayout Recovery Society</div>
+
+        <p class="result-description">
+          Our first New Game+ event celebrated
+          creative gaming challenges while supporting
+          women on their journeys toward recovery.
+        </p>
+
+      </article>
+
+    </div>
+
+    <!-- COMMUNITY THANK YOU -->
+    <section class="results-thanks">
+
+      <h2>Thank You for Making It Possible</h2>
+
+      <p>
+        To every runner, volunteer, moderator, donor,
+        viewer, and supporter who joined us throughout
+        2026: thank you.
+      </p>
+
+      <p>
+        Whether you participated in our annual event,
+        joined us for New Game+, or supported both,
+        you helped make a difference.
+      </p>
+
+      <p>
+        We are grateful to Child's Play and Wayout Recovery Society
+        for the work they do, and to our community
+        for helping us support their missions.
+      </p>
+
+    </section>
+
+    <!-- BUTTONS -->
+    <div class="results-actions">
+
+      <a
+        class="button"
+        href="https://www.youtube.com/@linktothecure4130"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Watch Highlights
+      </a>
+
+      <a class="button" href="index.html">
+        Return Home
+      </a>
+
+    </div>
+
+  </main>
+
+  <footer class="results-footer">
+    Link to the Cure • Proudly supporting Child's Play
+    and Wayout Recovery Society
   </footer>
+
 </body>
 </html>
